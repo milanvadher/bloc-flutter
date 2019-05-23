@@ -2,6 +2,7 @@ import 'package:blocarc/src/blocs/moviedetails-bloc-provider.dart';
 import 'package:blocarc/src/blocs/moviedetails-bloc.dart';
 import 'package:blocarc/src/models/movietrailer-model.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetail extends StatefulWidget {
   final posterUrl;
@@ -72,8 +73,7 @@ class MovieDetailState extends State<MovieDetail> {
         top: false,
         bottom: false,
         child: NestedScrollView(
-          headerSliverBuilder: (BuildContext context,
-              bool innerBoxIsScrolled) {
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverAppBar(
                 expandedHeight: 200.0,
@@ -82,9 +82,9 @@ class MovieDetailState extends State<MovieDetail> {
                 elevation: 0.0,
                 flexibleSpace: FlexibleSpaceBar(
                     background: Image.network(
-                      "https://image.tmdb.org/t/p/w500$posterUrl",
-                      fit: BoxFit.cover,
-                    )),
+                  "https://image.tmdb.org/t/p/w500$posterUrl",
+                  fit: BoxFit.cover,
+                )),
               ),
             ];
           },
@@ -101,8 +101,7 @@ class MovieDetailState extends State<MovieDetail> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(margin: EdgeInsets.only(top: 8.0,
-                    bottom: 8.0)),
+                Container(margin: EdgeInsets.only(top: 8.0, bottom: 8.0)),
                 Row(
                   children: <Widget>[
                     Icon(
@@ -110,8 +109,7 @@ class MovieDetailState extends State<MovieDetail> {
                       color: Colors.red,
                     ),
                     Container(
-                      margin: EdgeInsets.only(left: 1.0,
-                          right: 1.0),
+                      margin: EdgeInsets.only(left: 1.0, right: 1.0),
                     ),
                     Text(
                       voteAverage,
@@ -120,8 +118,7 @@ class MovieDetailState extends State<MovieDetail> {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(left: 10.0,
-                          right: 10.0),
+                      margin: EdgeInsets.only(left: 10.0, right: 10.0),
                     ),
                     Text(
                       releaseDate,
@@ -131,11 +128,9 @@ class MovieDetailState extends State<MovieDetail> {
                     ),
                   ],
                 ),
-                Container(margin: EdgeInsets.only(top: 8.0,
-                    bottom: 8.0)),
+                Container(margin: EdgeInsets.only(top: 8.0, bottom: 8.0)),
                 Text(description),
-                Container(margin: EdgeInsets.only(top: 8.0,
-                    bottom: 8.0)),
+                Container(margin: EdgeInsets.only(top: 8.0, bottom: 8.0)),
                 Text(
                   "Trailer",
                   style: TextStyle(
@@ -143,17 +138,17 @@ class MovieDetailState extends State<MovieDetail> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(margin: EdgeInsets.only(top: 8.0,
-                    bottom: 8.0)),
+                Container(margin: EdgeInsets.only(top: 8.0, bottom: 8.0)),
                 StreamBuilder(
                   stream: bloc.movieTrailers,
-                  builder:
-                      (context, AsyncSnapshot<Future<Trailers>> snapshot) {
+                  builder: (context, AsyncSnapshot<Future<Trailers>> snapshot) {
+                    print('snapshot ::: ');
+                    print(snapshot.data.toString());
                     if (snapshot.hasData) {
                       return FutureBuilder(
                         future: snapshot.data,
-                        builder: (context,
-                            AsyncSnapshot<Trailers> itemSnapShot) {
+                        builder:
+                            (context, AsyncSnapshot<Trailers> itemSnapShot) {
                           if (itemSnapShot.hasData) {
                             if (itemSnapShot.data.results.length > 0)
                               return trailerLayout(itemSnapShot.data);
@@ -206,11 +201,22 @@ class MovieDetailState extends State<MovieDetail> {
     return Expanded(
       child: Column(
         children: <Widget>[
-          Container(
-            margin: EdgeInsets.all(5.0),
-            height: 100.0,
-            color: Colors.grey,
-            child: Center(child: Icon(Icons.play_circle_filled)),
+          GestureDetector(
+            child: Container(
+              margin: EdgeInsets.all(5.0),
+              height: 100.0,
+              child: Center(child: Icon(Icons.play_circle_filled,size: 30,)),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage('http://i3.ytimg.com/vi/${data.results[index].key}/maxresdefault.jpg'),
+                  fit: BoxFit.fill,
+                ),
+                color: Colors.grey
+              ),
+            ),
+            onTap: () {
+              _launchURL(data.results[index].key);
+            },
           ),
           Text(
             data.results[index].name,
@@ -220,5 +226,14 @@ class MovieDetailState extends State<MovieDetail> {
         ],
       ),
     );
+  }
+
+  _launchURL(String key) async {
+    String url = 'https://www.youtube.com/watch?v=$key';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

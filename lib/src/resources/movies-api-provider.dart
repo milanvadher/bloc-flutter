@@ -21,7 +21,8 @@ class MoviesApiProvider {
   }
 
   Future<Trailers> fetchTrailer(int movieId) async {
-    final response = await client.get('$apiUrl/$movieId/videos?api_key=$apiKey"');
+    final response = await client.get('$apiUrl/$movieId/videos?api_key=$apiKey');
+    print(response.body.toString());
     if (response.statusCode == 200) {
       return Trailers.fromJson(json.decode(response.body));
     } else {
